@@ -1,0 +1,69 @@
+// package main
+
+// import (
+// 	"fmt"
+// 	"io/ioutil"
+// 	"log"
+
+// 	"gopkg.in/yaml.v3"
+// )
+
+// type Config1 struct {
+// 	Server   string `yaml:"server"`
+// 	Database string `yaml:"database"`
+// }
+
+// type Config2 struct {
+// 	APIKey string `yaml:"api_key"`
+// }
+
+// func main() {
+// 	// Read the YAML files
+// 	yamlFiles := []string{"config1.yaml", "config2.yaml"}
+
+// 	// Combine the YAML files into a single map
+// 	configMap := make(map[string]interface{})
+// 	for _, file := range yamlFiles {
+// 		yamlFile, err := ioutil.ReadFile(file)
+// 		if err != nil {
+// 			log.Fatalf("error: %v", err)
+// 		}
+
+// 		var tmpMap map[string]interface{}
+// 		err = yaml.Unmarshal(yamlFile, &tmpMap)
+// 		if err != nil {
+// 			log.Fatalf("error: %v", err)
+// 		}
+
+// 		for k, v := range tmpMap {
+// 			// Check if the key already exists in the map
+// 			if _, ok := configMap[k]; ok {
+// 				// If it does, append the value to a slice
+// 				switch t := v.(type) {
+// 				case []interface{}:
+// 					configMap[k] = append(configMap[k].([]interface{}), t...)
+// 				default:
+// 					// If the existing value is not a slice, convert it to a slice and append the new value
+// 					configMap[k] = []interface{}{configMap[k], v}
+// 				}
+// 			} else {
+// 				// If the key does not exist, add it to the map
+// 				configMap[k] = v
+// 			}
+// 		}
+// 	}
+
+// 	// Convert the map to YAML
+// 	output, err := yaml.Marshal(&configMap)
+// 	if err != nil {
+// 		log.Fatalf("error: %v", err)
+// 	}
+
+// 	// Write the combined YAML file
+// 	err = ioutil.WriteFile("combined-config.yaml", output, 0644)
+// 	if err != nil {
+// 		log.Fatalf("error: %v", err)
+// 	}
+
+// 	fmt.Println("Combined config file created successfully!")
+// }

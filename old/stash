@@ -1,0 +1,14 @@
+	// restapigqw := apigateway.NewFromConfig(config)
+	// restapigqw.CreateRestApi(context.TODO(), &apigateway.CreateRestApiInput{
+	// 	Name:        aws.String("test"),
+	// 	Description: aws.String("test desc"),
+	// 	EndpointConfiguration: &types.EndpointConfiguration{
+	// 		Types: []types.EndpointType{
+	// 			"REGIONAL",
+	// 		},
+	// 	},
+	// 	Tags: map[string]string{
+	// 		"name": "test",
+	// 	},
+	// })
+	
