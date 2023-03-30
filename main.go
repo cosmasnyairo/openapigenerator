@@ -73,6 +73,21 @@ type OpenApiPathOperation struct {
 	GatewayIntegration map[string]string `yaml:"x-amazon-apigateway-integration,omitempty"`
 }
 
+type OpenApiPathSpec struct {
+	Apis struct {
+		Get struct {
+			MethodResponses             interface{} `yaml:"methodresponses"`
+			AmazonApiGatewayIntegration struct {
+				URI           string      `yaml:"uri"`
+				ConnectionID  string      `yaml:"connectionId"`
+				HTTPMethod    string      `yaml:"httpMethod"`
+				MethodDetails interface{} `yaml:"methoddetails"`
+			} `yaml:"x-amazon-apigateway-integration"`
+		} `yaml:"get"`
+		Options interface{} `yaml:"options"`
+	}
+}
+
 // type OpenApiResource struct {
 // 	Resource    OpenApiResource
 // 	Method      string `yaml:"openapi"`
@@ -90,13 +105,15 @@ func main() {
 
 	pathspec := mergePaths([]Pathspec{})
 
+	generateOpenApiPaths(pathspec)
+
 	var pathitems []map[string]any
 
-	for _, paths := range pathspec {
-		pathitems = append(pathitems, paths.generateOpenApiPaths())
-	}
+	// for _, paths := range pathspec {
+	// 	pathitems = append(pathitems, paths.generateOpenApiPaths())
+	// }
 
-	generated, _ := yaml.Marshal(pathitems)
+	generated, _ := yaml.Marshal(&pathitems)
 
 	err := os.WriteFile("generated-paths.yaml", generated, 0644)
 	onError("Unable to write", err)
@@ -133,33 +150,39 @@ func mergePaths(pathspec []Pathspec) []Pathspec {
 	return pathspec
 }
 
-func (path *Pathspec) generateOpenApiPaths() map[string]any {
+func generateOpenApiPaths(pathspec []Pathspec) map[string]any {
 
-	// generate operations
-	var methods []map[string]OpenApiPathOperation
-
-	for _, method := range path.Methods {
-
-		methodOperation := map[string]OpenApiPathOperation{
-			strings.ToLower(method): {
-				GatewayIntegration: map[string]string{
-					"uri":          path.Uri,
-					"connectionId": "$${stageVariables.vpcLink}",
-					"httpMethod":   method,
+	var methods []byte
+	for _, paths := range pathspec {
+		// generate operations
+		for _, method := range paths.Methods {
+			methodOperation := map[string]any{
+				strings.ToLower(method): map[string]any{
+					"responses": map[string]string{
+						"test": "test",
+					},
+					"x-amazon-apigateway-integration": map[string]any{
+						"uri":          "https://$${stageVariables.url}/apis",
+						"connectionId": "$${stageVariables.vpcLink}",
+						"httpMethod":   strings.ToUpper(method),
+						"methoddetails": map[string]string{
+							"test": "test",
+						},
+					},
 				},
-			},
+			}
+			generated, _ := yaml.Marshal(&methodOperation)
+			methods = append(methods[:], generated[:]...)
 		}
-
-		// TODO prevent conversion to a list here
-
-		methods = append(methods, methodOperation)
 
 	}
 
+	err := os.WriteFile("generated-paths1.yaml", methods, 0644)
+	onError("Unable to write", err)
 	// TODO prevent conversion to a list here
 
 	pathitem := map[string]any{
-		path.Name: methods,
+		"path.Name": string(methods),
 	}
 
 	return pathitem
